@@ -1,7 +1,7 @@
 namespace go comment
 
 struct douyin_comment_action_request {
-  1: required string token       // 用户鉴权token
+  1: required string token (api.header = "token", api.query = "token")        // 用户鉴权token
   2: required i64 video_id (vt.gt = "0", api.vd="$>0")      // 视频id
   3: required i8 action_type (vt.in = "1", vt.in = "2", api.vd = "$==1||$==2")   // 1-发布评论，2-删除评论
   4: optional string comment_text (vt.min_size = "1", vt.max_size = "255", api.vd = "$=nil||(len($)>0&&len($)<256)") // 用户填写的评论内容，在action_type=1的时候使用
@@ -15,7 +15,7 @@ struct douyin_comment_action_response {
 }
 
 struct douyin_comment_list_request {
-  1: required string token // 用户鉴权token
+  1: required string token (api.header = "token", api.query = "token") // 用户鉴权token
   2: required i64 video_id (vt.gt = "0", api.vd="$>0") // 视频id
 }
 

@@ -85,3 +85,22 @@ services:
       - GF_AUTH_DISABLE_LOGIN_FORM=true
     ports:
       - "3000:3000"
+
+
+  # Pulsar
+  pulsar:
+    image: apachepulsar/pulsar:latest
+    ports:
+      - "16650:6650"
+      - "18080:8080"
+    environment:
+      - PULSAR_MEM=${PULSAR_MEM:-"-Xms1g -Xmx1g"}
+      - PULSAR_GC=${PULSAR_GC:-"-XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:G1HeapRegionSize=16m -XX:InitiatingHeapOccupancyPercent=35 -XX:ParallelGCThreads=4 -XX:ConcGCThreads=2 -XX:G1HeapWastePercent=10 -XX:G1MixedGCCountTarget=4 -XX:G1MixedGCLiveThresholdPercent=90 -XX:G1RSetUpdatingPauseTimePercent=5 -XX:SurvivorRatio=6 -XX:+DisableExplicitGC -XX:+UseStringDeduplication"}
+      - PULSAR_LOG_CONF_FILE=/pulsar/conf/log4j2.yaml
+      - PULSAR_LOG_DIR=/pulsar/logs
+      - PULSAR_CONF=/pulsar/conf
+      - PULSAR_EXTRA_CONF=${PULSAR_EXTRA_CONF:-""}
+    volumes:
+      - ./pulsar/data:/pulsar/data
+      - ./pulsar/conf:/pulsar/conf
+      - ./pulsar/logs:/pulsar/logs

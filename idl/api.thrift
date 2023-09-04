@@ -175,14 +175,6 @@ struct douyin_message_chat_response {
   3: list<Message> message_list // 消息列表
 }
 
-struct Message {
-  1: required i64 id // 消息id
-  2: required i64 to_user_id // 该消息接收者的id
-  3: required i64 from_user_id // 该消息发送者的id
-  4: required string content // 消息内容
-  5: optional i64 create_time // 消息创建时间
-}
-
 struct douyin_message_action_request {
   1: required string token (api.header = "token", api.query = "token") // 用户鉴权token
   2: required i64 to_user_id (vt.gt = "0", api.vd="$>0") // 对方用户id
@@ -193,6 +185,14 @@ struct douyin_message_action_request {
 struct douyin_message_action_response {
   1: required i64 status_code // 状态码，0-成功，其他值-失败
   2: optional string status_msg // 返回状态描述
+}
+
+struct Message {
+  1: required i64 id // 消息id
+  2: required i64 to_user_id // 该消息接收者的id
+  3: required i64 from_user_id // 该消息发送者的id
+  4: required string content // 消息内容
+  5: optional i64 create_time // 消息创建时间
 }
 
 struct douyin_publish_action_request {
@@ -328,41 +328,36 @@ struct UserInfo {
 }
 
 
-// 基础接口
-service FeedService {
+service VideoService {
+    // Feed
     douyin_feed_response GetFeed(1: douyin_feed_request req) (api.get="/douyin/feed/")
-}
-
-service UserService {
-    douyin_user_register_response Register(1: douyin_user_register_request req) (api.post="/douyin/user/register/")
-    douyin_user_login_response Login(1: douyin_user_login_request req) (api.post="/douyin/user/login/")
-    douyin_user_response GetUserInfo(1: douyin_user_request req) (api.get="/douyin/user/")
-}
-
-service PublishService {
+    // Publish
     douyin_publish_action_response PublishAction(1: douyin_publish_action_request req) (api.post="/douyin/publish/action/")
     douyin_publish_list_response GetPublishVideos(1: douyin_publish_list_request req) (api.get="/douyin/publish/list/")
-}
-
-// 互动接口
-service FavoriteService {
+    // Favorite
     douyin_favorite_action_response FavoriteVideo(1: douyin_favorite_action_request req) (api.post="/douyin/favorite/action/")
     douyin_favorite_list_response GetFavoriteList(1: douyin_favorite_list_request req) (api.get="/douyin/favorite/list/")
 }
 
-service CommentService {
-    douyin_comment_action_response CommentAction(1: douyin_comment_action_request req) (api.post="/douyin/comment/action/")
-    douyin_comment_list_response GetCommentList(1: douyin_comment_list_request req) (api.get="/douyin/comment/list/")
-}
-
-// 社交接口
-service RelationService {
+service UserService {
+    // User
+    douyin_user_register_response Register(1: douyin_user_register_request req) (api.post="/douyin/user/register/")
+    douyin_user_login_response Login(1: douyin_user_login_request req) (api.post="/douyin/user/login/")
+    douyin_user_response GetUserInfo(1: douyin_user_request req) (api.get="/douyin/user/")
+    // Relation
     douyin_relation_action_response Follow(1: douyin_relation_action_request req) (api.post="/douyin/relation/action/")
     douyin_relation_follow_list_response GetFollowList(1: douyin_relation_follow_list_request req) (api.get="/douyin/relation/follow/list/")
     douyin_relation_follower_list_response GetFollowerList(1: douyin_relation_follower_list_request req) (api.get="/douyin/relation/follower/list/")
     douyin_relation_friend_list_response GetFriendList(1: douyin_relation_friend_list_request req) (api.get="/douyin/relation/friend/list/")
 }
 
+// Comment
+service CommentService {
+    douyin_comment_action_response CommentAction(1: douyin_comment_action_request req) (api.post="/douyin/comment/action/")
+    douyin_comment_list_response GetCommentList(1: douyin_comment_list_request req) (api.get="/douyin/comment/list/")
+}
+
+// Message
 service MessageService {
     douyin_message_action_response SendMessage(1: douyin_message_action_request req) (api.post="/douyin/message/action/")
     douyin_message_chat_response GetMessageChat(1: douyin_message_chat_request req) (api.get="/douyin/message/chat/")
