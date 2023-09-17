@@ -12,7 +12,7 @@ import (
 )
 
 type UserClaims struct {
-	UserID uint64
+	ID uint64
 	jwt.RegisteredClaims
 }
 

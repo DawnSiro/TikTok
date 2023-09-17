@@ -4,14 +4,14 @@ package api
 
 import (
 	"context"
+	api "douyin/cmd/api/biz/model/api"
 	"douyin/cmd/api/biz/rpc"
 	"douyin/kitex_gen/comment"
 	"douyin/pkg/errno"
 	"douyin/pkg/global"
-	"github.com/cloudwego/hertz/pkg/common/hlog"
 
-	api "douyin/cmd/api/biz/model/api"
 	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 )
 

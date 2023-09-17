@@ -1,14 +1,14 @@
 package pack
 
 import (
-	"douyin/dal/db"
+	"douyin/dal/model"
 	"douyin/kitex_gen/comment"
 	"douyin/pkg/errno"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 )
 
-func Comment(dbc *db.Comment, dbu *db.User, isFollow bool) *comment.Comment {
+func Comment(dbc *model.Comment, dbu *model.User, isFollow bool) *comment.Comment {
 	if dbc == nil || dbu == nil {
 		klog.Error("pack.comment.Comment err:", errno.ServiceError)
 		return nil
@@ -22,7 +22,7 @@ func Comment(dbc *db.Comment, dbu *db.User, isFollow bool) *comment.Comment {
 	}
 }
 
-func User(u *db.User, isFollow bool) *comment.User {
+func User(u *model.User, isFollow bool) *comment.User {
 	if u == nil {
 		klog.Error("pack.user.User err:", errno.ServiceError)
 		return nil
@@ -39,7 +39,7 @@ func User(u *db.User, isFollow bool) *comment.User {
 	}
 }
 
-func CommentData(data *db.CommentData) *comment.Comment {
+func CommentData(data *model.CommentData) *comment.Comment {
 	if data == nil {
 		return nil
 	}
@@ -61,7 +61,7 @@ func CommentData(data *db.CommentData) *comment.Comment {
 	}
 }
 
-func CommentDataList(cdList []*db.CommentData) []*comment.Comment {
+func CommentDataList(cdList []*model.CommentData) []*comment.Comment {
 	res := make([]*comment.Comment, 0, len(cdList))
 	for i := 0; i < len(cdList); i++ {
 		res = append(res, CommentData(cdList[i]))

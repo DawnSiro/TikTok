@@ -1,51 +1,51 @@
 package pack
 
 import (
-	"douyin/biz/model/api"
 	"douyin/dal/model"
+	"douyin/kitex_gen/video"
 	"douyin/pkg/errno"
 
-	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"github.com/cloudwego/kitex/pkg/klog"
 )
 
-func Video(v *model.Video, u *model.User, isFollow, isFavorite bool) *api.Video {
+func Video(v *model.Video, u *model.User, isFollow, isFavorite bool) *video.Video {
 	if v == nil || u == nil {
-		hlog.Error("pack.video.Video err:", errno.ServiceError)
+		klog.Error("pack.video.Video err:", errno.ServiceError)
 		return nil
 	}
-	author := &api.UserInfo{
-		ID:              int64(u.ID),
+	author := &video.UserInfo{
+		Id:              int64(u.ID),
 		Name:            u.Username,
-		FollowCount:     int64(u.FollowingCount),
-		FollowerCount:   int64(u.FollowerCount),
+		FollowCount:     u.FollowingCount,
+		FollowerCount:   u.FollowerCount,
 		IsFollow:        isFollow,
 		Avatar:          u.Avatar,
 		BackgroundImage: u.BackgroundImage,
 		Signature:       u.Signature,
-		TotalFavorited:  int64(u.TotalFavorited),
-		WorkCount:       int64(u.WorkCount),
-		FavoriteCount:   int64(u.FavoriteCount),
+		TotalFavorited:  u.TotalFavorited,
+		WorkCount:       u.WorkCount,
+		FavoriteCount:   u.FavoriteCount,
 	}
-	return &api.Video{
-		ID:            int64(v.ID),
+	return &video.Video{
+		Id:            int64(v.ID),
 		Author:        author,
-		PlayURL:       v.PlayURL,
-		CoverURL:      v.CoverURL,
-		FavoriteCount: int64(v.FavoriteCount),
-		CommentCount:  int64(v.CommentCount),
+		PlayUrl:       v.PlayURL,
+		CoverUrl:      v.CoverURL,
+		FavoriteCount: v.FavoriteCount,
+		CommentCount:  v.CommentCount,
 		IsFavorite:    isFavorite,
 		Title:         v.Title,
 	}
 }
 
-func VideoData(data *model.VideoData) *api.Video {
+func VideoData(data *model.VideoData) *video.Video {
 	if data == nil {
 		return nil
 	}
 	followCount := data.FollowCount
 	followerCount := data.FollowerCount
-	author := &api.UserInfo{
-		ID:              int64(data.UID),
+	author := &video.UserInfo{
+		Id:              int64(data.UID),
 		Name:            data.Username,
 		FollowCount:     followCount,
 		FollowerCount:   followerCount,
@@ -57,11 +57,11 @@ func VideoData(data *model.VideoData) *api.Video {
 		WorkCount:       data.WorkCount,
 		FavoriteCount:   data.UserFavoriteCount,
 	}
-	return &api.Video{
-		ID:            int64(data.VID),
+	return &video.Video{
+		Id:            int64(data.VID),
 		Author:        author,
-		PlayURL:       data.PlayURL,
-		CoverURL:      data.CoverURL,
+		PlayUrl:       data.PlayURL,
+		CoverUrl:      data.CoverURL,
 		FavoriteCount: data.FavoriteCount,
 		CommentCount:  data.CommentCount,
 		IsFavorite:    data.IsFavorite,
@@ -69,8 +69,8 @@ func VideoData(data *model.VideoData) *api.Video {
 	}
 }
 
-func VideoDataList(dataList []*model.VideoData) []*api.Video {
-	res := make([]*api.Video, 0, len(dataList))
+func VideoDataList(dataList []*model.VideoData) []*video.Video {
+	res := make([]*video.Video, 0, len(dataList))
 	for i := 0; i < len(dataList); i++ {
 		res = append(res, VideoData(dataList[i]))
 	}

@@ -17,6 +17,13 @@ func JWT() app.HandlerFunc {
 	return func(ctx context.Context, c *app.RequestContext) {
 		token := c.Query("token")
 		if token == "" {
+			token = c.PostForm("token")
+		}
+		if token == "" {
+			token = c.Request.Header.Get("token")
+		}
+
+		if token == "" {
 			hlog.Error("mw.jwt.ParseToken err:", errno.UserIdentityVerificationFailedError)
 			c.JSON(consts.StatusBadRequest, utils.H{
 				"status_code": errno.UserIdentityVerificationFailedError.ErrCode,

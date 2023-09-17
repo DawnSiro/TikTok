@@ -80,9 +80,17 @@ struct douyin_comment_list_response {
 
 struct Comment {
   1: required i64 id // 视频评论id
-  2: required User user // 评论用户信息
+  2: required CommentUser user // 评论用户信息
   3: required string content // 评论内容
   4: required string create_date // 评论发布日期，格式 mm-dd
+}
+
+// 评论区用户信息，关注总数和粉丝总数在跳转到具体用户信息页面时再重新获取
+struct CommentUser {
+  1: required i64 id // 用户id
+  2: required string name  // 用户名称
+  3: required bool is_follow  // true-已关注，false-未关注
+  4: required string avatar  // 用户头像Url
 }
 
 struct User {
@@ -175,6 +183,14 @@ struct douyin_message_chat_response {
   3: list<Message> message_list // 消息列表
 }
 
+struct Message {
+  1: required i64 id // 消息id
+  2: required i64 to_user_id // 该消息接收者的id
+  3: required i64 from_user_id // 该消息发送者的id
+  4: required string content // 消息内容
+  5: optional i64 create_time // 消息创建时间
+}
+
 struct douyin_message_action_request {
   1: required string token (api.header = "token", api.query = "token") // 用户鉴权token
   2: required i64 to_user_id (vt.gt = "0", api.vd="$>0") // 对方用户id
@@ -185,14 +201,6 @@ struct douyin_message_action_request {
 struct douyin_message_action_response {
   1: required i64 status_code // 状态码，0-成功，其他值-失败
   2: optional string status_msg // 返回状态描述
-}
-
-struct Message {
-  1: required i64 id // 消息id
-  2: required i64 to_user_id // 该消息接收者的id
-  3: required i64 from_user_id // 该消息发送者的id
-  4: required string content // 消息内容
-  5: optional i64 create_time // 消息创建时间
 }
 
 struct douyin_publish_action_request {
@@ -237,7 +245,15 @@ struct douyin_relation_follow_list_request {
 struct douyin_relation_follow_list_response {
   1: required i64 status_code // 状态码，0-成功，其他值-失败
   2: optional string status_msg // 返回状态描述
-  3: list<User> user_list // 用户信息列表
+  3: list<FollowUser> user_list // 用户信息列表
+}
+
+// 关注用户信息，关注总数和粉丝总数在跳转到具体用户信息页面时再重新获取
+struct FollowUser {
+  1: required i64 id // 用户id
+  2: required string name  // 用户名称
+  3: required bool is_follow  // true-已关注，false-未关注
+  4: required string avatar  // 用户头像Url
 }
 
 struct douyin_relation_follower_list_request {
@@ -248,9 +264,16 @@ struct douyin_relation_follower_list_request {
 struct douyin_relation_follower_list_response {
   1: required i64 status_code // 状态码，0-成功，其他值-失败
   2: optional string status_msg  // 返回状态描述
-  3: list<User> user_list  // 用户列表
+  3: list<FollowerUser> user_list  // 用户列表
 }
 
+// 粉丝用户信息，关注总数和粉丝总数在跳转到具体用户信息页面时再重新获取
+struct FollowerUser {
+  1: required i64 id // 用户id
+  2: required string name  // 用户名称
+  3: required bool is_follow  // true-已关注，false-未关注
+  4: required string avatar  // 用户头像Url
+}
 
 struct douyin_relation_friend_list_request {
   1: required i64 user_id (vt.gt = "0", api.vd="$>0")  // 用户id
@@ -267,12 +290,10 @@ struct douyin_relation_friend_list_response {
 struct FriendUser {
   1: required i64 id // 用户id
   2: required string name  // 用户名称
-  3: optional i64 follow_count  // 关注总数
-  4: optional i64 follower_count   // 粉丝总数
-  5: required bool is_follow  // true-已关注，false-未关注
-  6: required string avatar  // 用户头像Url
-  7: optional string message // 和该好友的最新聊天消息
-  8: required i8 msgType // message消息的类型，0 => 当前请求用户接收的消息， 1 => 当前请求用户发送的消息
+  3: required bool is_follow  // true-已关注，false-未关注
+  4: required string avatar  // 用户头像Url
+  5: optional string message // 和该好友的最新聊天消息
+  6: required i8 msgType // message消息的类型，0 => 当前请求用户接收的消息， 1 => 当前请求用户发送的消息
 }
 
 
@@ -326,6 +347,8 @@ struct UserInfo {
   10: required i64 work_count  // 用户作品数
   11: required i64 favorite_count  // 用户点赞的视频数
 }
+
+
 
 
 service VideoService {

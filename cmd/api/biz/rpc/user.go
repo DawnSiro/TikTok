@@ -51,3 +51,21 @@ func Login(ctx context.Context, req *user.DouyinUserLoginRequest) (*user.DouyinU
 func GetUserInfo(ctx context.Context, req *user.DouyinUserRequest) (*user.DouyinUserResponse, error) {
 	return userClient.GetUserInfo(ctx, req)
 }
+
+// relation
+
+func Follow(ctx context.Context, req *user.DouyinRelationActionRequest) (*user.DouyinRelationActionResponse, error) {
+	return userClient.Follow(ctx, req)
+}
+
+func GetFollowList(ctx context.Context, req *user.DouyinRelationFollowListRequest) (*user.DouyinRelationFollowListResponse, error) {
+	return userClient.GetFollowList(ctx, req)
+}
+
+func GetFollowerList(ctx context.Context, req *user.DouyinRelationFollowerListRequest) (*user.DouyinRelationFollowerListResponse, error) {
+	return userClient.GetFollowerList(ctx, req)
+}
+
+func GetFriendList(ctx context.Context, req *user.DouyinRelationFriendListRequest) (*user.DouyinRelationFriendListResponse, error) {
+	return userClient.GetFriendList(ctx, req)
+}

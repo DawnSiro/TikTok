@@ -1,42 +1,23 @@
-# DouYin
+# TikTok
 
-## Introduction
+## 引入
 
-A simple note service built with `Kitex` and `Hertz` which is divided into three microservices.
+极简抖音项目微服务版本（按照领域划分模块，其中 Video 接口过多故再拆一个 Comment 模块出来）
 
-| Service Name | Usage                    | Framework   | protocol | Path         | IDL                 |
-|--------------|--------------------------|-------------|----------|--------------|---------------------|
-| api          | HTTP interface           | kitex/hertz | http     | cmd/api      | idl/api.thrift      |
-| comment      | comment data management  | kitex/gorm  | thrift   | cmd/comment  | idl/comment.thrift  |
-| favorite     | favorite data management | kitex/gorm  | thrift   | cmd/favorite | idl/favorite.thrift |
-| feed         | feed data management     | kitex/gorm  | thrift   | cmd/feed     | idl/feed.thrift     |
-| message      | message data management  | kitex/gorm  | thrift   | cmd/message  | idl/message.thrift  |
-| publish      | publish data management  | kitex/gorm  | thrift   | cmd/publish  | idl/publish.thrift  |
-| relation     | relation data management | kitex/gorm  | thrift   | cmd/relation | idl/relation.thrift |
-| user         | user data management     | kitex/gorm  | thrift   | cmd/user     | idl/user.thrift     |
+| 服务名  | 主要功能     | 技术栈      | 协议   | 路径        | IDL 文件           |
+| ------- | ------------ | ----------- | ------ | ----------- | ------------------ |
+| api     | HTTP 接口    | kitex/hertz | http   | cmd/api     | idl/api.thrift     |
+| comment | 评论模块逻辑 | kitex/gorm  | thrift | cmd/comment | idl/comment.thrift |
+| message | 消息模块逻辑 | kitex/gorm  | thrift | cmd/message | idl/message.thrift |
+| video   | 视频模块逻辑 | kitex/gorm  | thrift | cmd/publish | idl/publish.thrift |
+| user    | 用户模块逻辑 | kitex/gorm  | thrift | cmd/user    | idl/user.thrift    |
 
-### Call Relations
 
-### Basic Features
 
-- Hertz
-    - Use `thrift` IDL to define HTTP interface
-    - Use `hz` to generate code
-    - Use `Hertz` binding and validate
-    - Use `obs-opentelemetry` and `jarger` for `tracing`, `metrics`, `logging`
-    - Middleware
-        - Use `requestid`, `jwt`, `recovery`, `pprof`, `gzip`
-- Kitex
-    - Use `thrift` IDL to define `RPC` interface
-    - Use `kitex` to generate code
-    - Use `thrift-gen-validator` for validating RPC request
-    - Use `obs-opentelemetry` and `jarger` for `tracing`, `metrics`, `logging`
-    - Use `registry-etcd` for service discovery and register
+### 项目目录介绍
 
-### Catalog Introduce
-
-| catalog     | introduce               |
-|-------------|-------------------------|
+| 包          | 主要功能                |
+| ----------- | ----------------------- |
 | handler     | HTTP handler            |
 | service     | business logic          |
 | rpc         | RPC call logic          |
@@ -47,58 +28,38 @@ A simple note service built with `Kitex` and `Hertz` which is divided into three
 | pkg/errno   | customized error number |
 | pkg/configs | SQL and Tracing configs |
 
-## Quick Start
 
-### Setup Basic Dependence
+
+## 快速开始
+
+### 配置基本运行环境
+
+使用 docker-compose 拉取环境的镜像
 
 ```shell
 docker-compose up
 ```
 
-### Run Comment RPC Server
+### 运行 Comment RPC 服务
 
 ```shell
-cd cmd/user
+cd cmd/comment
 sh build.sh
 sh output/bootstrap.sh
 ```
 
-### Run Favorite RPC Server
+### 运行 Message RPC 服务
 
 ```shell
-cd cmd/user
+cd cmd/message
 sh build.sh
 sh output/bootstrap.sh
 ```
 
-### Run Feed RPC Server
+### 运行 Video RPC 服务
 
 ```shell
-cd cmd/user
-sh build.sh
-sh output/bootstrap.sh
-```
-
-### Run Message RPC Server
-
-```shell
-cd cmd/user
-sh build.sh
-sh output/bootstrap.sh
-```
-
-### Run Publish RPC Server
-
-```shell
-cd cmd/user
-sh build.sh
-sh output/bootstrap.sh
-```
-
-### Run Relation RPC Server
-
-```shell
-cd cmd/user
+cd cmd/video
 sh build.sh
 sh output/bootstrap.sh
 ```
@@ -111,7 +72,7 @@ sh build.sh
 sh output/bootstrap.sh
 ```
 
-### Run API Server
+### 运行 HTTP API 服务
 
 ```shell
 cd cmd/api
@@ -122,16 +83,10 @@ go run .
 
 Visit `http://127.0.0.1:16686/` on browser
 
-#### Snapshots
+
 
 
 ### Grafana
 
 Visit `http://127.0.0.1:3000/` on browser
 
-#### Dashboard Example
-
-
-## API Requests
-
-The following is a list of API requests and partial responses.

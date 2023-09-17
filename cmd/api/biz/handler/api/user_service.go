@@ -110,3 +110,146 @@ func GetUserInfo(ctx context.Context, c *app.RequestContext) {
 
 	c.JSON(consts.StatusOK, resp)
 }
+
+// Follow .
+// @router /douyin/relation/action/ [POST]
+func Follow(ctx context.Context, c *app.RequestContext) {
+	var err error
+	var req api.DouyinRelationActionRequest
+	err = c.BindAndValidate(&req)
+	if err != nil {
+		c.JSON(consts.StatusOK, &api.DouyinResponse{
+			StatusCode: errno.UserRequestParameterError.ErrCode,
+			StatusMsg:  err.Error(),
+		})
+		return
+	}
+
+	hlog.Info("handler.relation_service.Follow Request:", req)
+	userID := c.GetUint64(global.Config.JWTConfig.IdentityKey)
+	hlog.Info("handler.relation_service.Follow GetUserID:", userID)
+	resp, err := rpc.Follow(context.Background(), &user.DouyinRelationActionRequest{
+		Token:      req.Token,
+		ToUserId:   req.ToUserID,
+		ActionType: req.ActionType,
+	})
+
+	if err != nil {
+		errNo := errno.ConvertErr(err)
+		c.JSON(consts.StatusOK, &api.DouyinRelationActionResponse{
+			StatusCode: errNo.ErrCode,
+			StatusMsg:  &errNo.ErrMsg,
+		})
+		return
+	}
+
+	c.JSON(consts.StatusOK, resp)
+}
+
+// GetFollowList .
+// @router /douyin/relation/follow/list/ [GET]
+func GetFollowList(ctx context.Context, c *app.RequestContext) {
+	var err error
+	var req api.DouyinRelationFollowListRequest
+	err = c.BindAndValidate(&req)
+	if err != nil {
+		c.JSON(consts.StatusOK, &api.DouyinResponse{
+			StatusCode: errno.UserRequestParameterError.ErrCode,
+			StatusMsg:  err.Error(),
+		})
+		return
+	}
+
+	hlog.Info("handler.relation_service.GetFollowList Request:", req)
+	userID := c.GetUint64(global.Config.JWTConfig.IdentityKey)
+	hlog.Info("handler.relation_service.GetFollowList GetUserID:", userID)
+	resp, err := rpc.GetFollowList(context.Background(), &user.DouyinRelationFollowListRequest{
+		UserId: req.UserID,
+		Token:  req.Token,
+	})
+	if err != nil {
+		errNo := errno.ConvertErr(err)
+		c.JSON(consts.StatusOK, &api.DouyinRelationFollowListResponse{
+			StatusCode: errNo.ErrCode,
+			StatusMsg:  &errNo.ErrMsg,
+		})
+		return
+	}
+
+	c.JSON(consts.StatusOK, resp)
+}
+
+// GetFollowerList .
+// @router /douyin/relation/follower/list/ [GET]
+func GetFollowerList(ctx context.Context, c *app.RequestContext) {
+	var err error
+	var req api.DouyinRelationFollowerListRequest
+	err = c.BindAndValidate(&req)
+	if err != nil {
+		c.JSON(consts.StatusOK, &api.DouyinResponse{
+			StatusCode: errno.UserRequestParameterError.ErrCode,
+			StatusMsg:  err.Error(),
+		})
+		return
+	}
+
+	hlog.Info("handler.relation_service.GetFollowerList Request:", req)
+	userID := c.GetUint64(global.Config.JWTConfig.IdentityKey)
+	hlog.Info("handler.relation_service.GetFollowList GetUserID:", userID)
+	resp, err := rpc.GetFollowerList(context.Background(), &user.DouyinRelationFollowerListRequest{
+		UserId: req.UserID,
+		Token:  req.Token,
+	})
+	if err != nil {
+		errNo := errno.ConvertErr(err)
+		c.JSON(consts.StatusOK, &api.DouyinRelationFollowerListResponse{
+			StatusCode: errNo.ErrCode,
+			StatusMsg:  &errNo.ErrMsg,
+		})
+		return
+	}
+
+	c.JSON(consts.StatusOK, resp)
+}
+
+// GetFriendList .
+// @router /douyin/relation/friend/list/ [GET]
+func GetFriendList(ctx context.Context, c *app.RequestContext) {
+	var err error
+	var req api.DouyinRelationFriendListRequest
+	err = c.BindAndValidate(&req)
+	if err != nil {
+		c.JSON(consts.StatusOK, &api.DouyinResponse{
+			StatusCode: errno.UserRequestParameterError.ErrCode,
+			StatusMsg:  err.Error(),
+		})
+		return
+	}
+
+	hlog.Info("handler.relation_service.GetFollowerList Request:", req)
+	userID := c.GetUint64(global.Config.JWTConfig.IdentityKey)
+	hlog.Info("handler.relation_service.GetFollowerList GetUserID:", userID)
+	// 目前的判断是不能看别人的好友列表
+	if userID != uint64(req.UserID) {
+		hlog.Error("handler.relation_service.GetFollowerList err:", errno.UserRequestParameterError.ErrCode)
+		c.JSON(consts.StatusOK, &api.DouyinRelationFriendListResponse{
+			StatusCode: errno.UserRequestParameterError.ErrCode,
+			StatusMsg:  &errno.UserRequestParameterError.ErrMsg,
+		})
+		return
+	}
+	resp, err := rpc.GetFriendList(context.Background(), &user.DouyinRelationFriendListRequest{
+		UserId: req.UserID,
+		Token:  req.Token,
+	})
+	if err != nil {
+		errNo := errno.ConvertErr(err)
+		c.JSON(consts.StatusOK, &api.DouyinRelationFriendListResponse{
+			StatusCode: errNo.ErrCode,
+			StatusMsg:  &errNo.ErrMsg,
+		})
+		return
+	}
+
+	c.JSON(consts.StatusOK, resp)
+}
