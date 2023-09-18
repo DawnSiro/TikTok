@@ -1,46 +1,40 @@
 package db
 
 import (
-	"context"
+	"errors"
+	"time"
+
+	"douyin/dal/model"
 	"douyin/pkg/constant"
 	"douyin/pkg/errno"
 	"douyin/pkg/global"
-	"errors"
+
 	"gorm.io/gorm"
 )
 
-type UserFavoriteVideo struct {
-	ID        uint64 `json:"id"`
-	UserID    uint64 `gorm:"not null" json:"user_id"`
-	VideoID   uint64 `gorm:"not null" json:"video_id"`
-	IsDeleted uint8  `gorm:"default:0;not null" json:"is_deleted"`
-}
-
-func (n *UserFavoriteVideo) TableName() string {
-	return constant.UserFavoriteVideosTableName
-}
-
-func FavoriteVideo(ctx context.Context, userID uint64, videoID uint64) error {
+func FavoriteVideo(userID uint64, videoID uint64) error {
 	if userID == 0 || videoID == 0 {
 		return errno.UserRequestParameterError
 	}
 
-	userFavoriteVideo := &UserFavoriteVideo{
-		UserID:  userID,
-		VideoID: videoID,
+	userFavoriteVideo := &model.UserFavoriteVideo{
+		UserID:      userID,
+		VideoID:     videoID,
+		CreatedTime: time.Now(),
 	}
 
 	// 先查询是否存在软删除的点赞数据
-	result := global.DB.WithContext(ctx).Where("is_deleted = ?", constant.DataDeleted).Limit(1).Find(userFavoriteVideo)
+	result := global.DB.Where("user_id = ? AND video_id = ? AND is_deleted = ?",
+		userID, videoID, constant.DataDeleted).Limit(1).Find(userFavoriteVideo)
 	if result.Error != nil {
 		return result.Error
 	}
-	return global.DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+	return global.DB.Transaction(func(tx *gorm.DB) error {
 		// 增加该视频的点赞数
-		video := &Video{
+		video := &model.Video{
 			ID: videoID,
 		}
-		err := tx.First(&video).Error
+		err := tx.Select("favorite_count, author_id").First(&video).Error
 		if err != nil {
 			return err
 		}
@@ -49,7 +43,7 @@ func FavoriteVideo(ctx context.Context, userID uint64, videoID uint64) error {
 		}
 
 		// 更新用户的点赞视频数
-		u := &User{ID: userID}
+		u := &model.User{ID: userID}
 		err = tx.Select("favorite_count").First(u).Error
 		if err != nil {
 			return err
@@ -58,6 +52,18 @@ func FavoriteVideo(ctx context.Context, userID uint64, videoID uint64) error {
 		if err != nil {
 			return err
 		}
+
+		// 更新被点赞用户的总获赞数
+		author := &model.User{ID: video.AuthorID}
+		err = tx.Select("total_favorited").First(author).Error
+		if err != nil {
+			return err
+		}
+		err = tx.Model(u).Update("total_favorited", author.TotalFavorited+1).Error
+		if err != nil {
+			return err
+		}
+
 		if result.RowsAffected == 1 {
 			// 如果有则修改为未删除
 			return tx.Model(userFavoriteVideo).Update("is_deleted", constant.DataNotDeleted).Error
@@ -67,26 +73,30 @@ func FavoriteVideo(ctx context.Context, userID uint64, videoID uint64) error {
 	})
 }
 
-func CancelFavoriteVideo(ctx context.Context, userID uint64, videoID uint64) error {
+func CancelFavoriteVideo(userID uint64, videoID uint64) error {
 	if userID == 0 || videoID == 0 {
 		return errors.New("cancel favorite failed")
 	}
 
-	userFavoriteVideo := &UserFavoriteVideo{
+	userFavoriteVideo := &model.UserFavoriteVideo{
 		UserID:  userID,
 		VideoID: videoID,
 	}
-	result := global.DB.WithContext(ctx).Where("is_deleted = ?", constant.DataNotDeleted).Limit(1).Find(userFavoriteVideo)
+	result := global.DB.Where("user_id = ? AND video_id = ?",
+		userID, videoID).Limit(1).Find(userFavoriteVideo)
 	if result.Error != nil {
 		return result.Error
 	}
+	if userFavoriteVideo.IsDeleted == constant.DataDeleted {
+		return errors.New("用户重复操作")
+	}
 
-	return global.DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+	return global.DB.Transaction(func(tx *gorm.DB) error {
 		// 增加该视频的点赞数
-		video := &Video{
+		video := &model.Video{
 			ID: videoID,
 		}
-		err := tx.First(&video).Error
+		err := tx.Select("favorite_count, author_id").First(&video).Error
 		if err != nil {
 			return err
 		}
@@ -95,7 +105,7 @@ func CancelFavoriteVideo(ctx context.Context, userID uint64, videoID uint64) err
 		}
 
 		// 更新用户的点赞视频数
-		u := &User{ID: userID}
+		u := &model.User{ID: userID}
 		err = tx.Select("favorite_count").First(u).Error
 		if err != nil {
 			return err
@@ -104,27 +114,49 @@ func CancelFavoriteVideo(ctx context.Context, userID uint64, videoID uint64) err
 		if err != nil {
 			return err
 		}
+
+		// 更新被点赞用户的总获赞数
+		author := &model.User{ID: video.AuthorID}
+		err = tx.Select("total_favorited").First(author).Error
+		if err != nil {
+			return err
+		}
+		err = tx.Model(u).Update("total_favorited", author.TotalFavorited-1).Error
+		if err != nil {
+			return err
+		}
+
 		// 进行软删除
-		return global.DB.WithContext(ctx).Model(userFavoriteVideo).Update("is_deleted", constant.DataDeleted).Error
+		return global.DB.Model(userFavoriteVideo).Update("is_deleted", constant.DataDeleted).Error
 	})
 }
 
-func SelectFavoriteVideoListByUserID(ctx context.Context, toUserID uint64) ([]*Video, error) {
-	res := make([]*Video, 0)
+func SelectFavoriteVideoListByUserID(toUserID uint64) ([]*model.Video, error) {
+	res := make([]*model.Video, 0)
 	// 使用子查询避免循环查询DB
-	selectVideoIDSQL := global.DB.WithContext(ctx).Select(`video_id`).
-		Table("user_favorite_video").
+	selectVideoIDSQL := global.DB.Select(`video_id`).
+		Table(constant.UserFavoriteVideosTableName).
 		Where("user_id = ? AND is_deleted = ?", toUserID, constant.DataNotDeleted)
-	global.DB.WithContext(ctx).Where("id IN (?)", selectVideoIDSQL).Find(&res)
+	global.DB.Where("id IN (?)", selectVideoIDSQL).Find(&res)
 	return res, nil
 }
 
-func IsFavoriteVideo(ctx context.Context, userID, videoID uint64) bool {
+func IsFavoriteVideo(userID, videoID uint64) bool {
 	if userID == 0 || videoID == 0 {
 		return false
 	}
-	ufv := make([]*UserFavoriteVideo, 0, 1)
-	res := global.DB.WithContext(ctx).Where("user_id = ? AND video_id = ? AND is_deleted = ?",
+	ufv := make([]*model.UserFavoriteVideo, 0, 1)
+	res := global.DB.Where("user_id = ? AND video_id = ? AND is_deleted = ?",
 		userID, videoID, constant.DataNotDeleted).Limit(1).Find(&ufv)
 	return res.RowsAffected == 1
+}
+
+func SelectTopFavoriteVideos(limit int) ([]model.Video, error) {
+	var videos []model.Video
+
+	if err := global.DB.Order("favorite_count desc").Limit(limit).Find(&videos).Error; err != nil {
+		return nil, err
+	}
+
+	return videos, nil
 }

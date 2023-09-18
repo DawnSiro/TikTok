@@ -1,7 +1,9 @@
 package main
 
 import (
-	"douyin/pkg/initialize"
+	"douyin/dal/db"
+	"douyin/dal/rdb"
+	"douyin/pkg/viper"
 	"net"
 
 	"douyin/kitex_gen/user/userservice"
@@ -18,10 +20,9 @@ import (
 )
 
 func Init() {
-	initialize.Viper()
-	initialize.MySQL()
-	initialize.Redis()
-	// klog init
+	viper.InitConfig()
+	db.InitMySQL()
+	rdb.InitRedis()
 	klog.SetLogger(kitexlogrus.NewLogger())
 	klog.SetLevel(klog.LevelInfo)
 }

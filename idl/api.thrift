@@ -80,9 +80,17 @@ struct douyin_comment_list_response {
 
 struct Comment {
   1: required i64 id // 视频评论id
-  2: required User user // 评论用户信息
+  2: required CommentUser user // 评论用户信息
   3: required string content // 评论内容
   4: required string create_date // 评论发布日期，格式 mm-dd
+}
+
+// 评论区用户信息，关注总数和粉丝总数在跳转到具体用户信息页面时再重新获取
+struct CommentUser {
+  1: required i64 id // 用户id
+  2: required string name  // 用户名称
+  3: required bool is_follow  // true-已关注，false-未关注
+  4: required string avatar  // 用户头像Url
 }
 
 struct User {
@@ -237,7 +245,15 @@ struct douyin_relation_follow_list_request {
 struct douyin_relation_follow_list_response {
   1: required i64 status_code // 状态码，0-成功，其他值-失败
   2: optional string status_msg // 返回状态描述
-  3: list<User> user_list // 用户信息列表
+  3: list<FollowUser> user_list // 用户信息列表
+}
+
+// 关注用户信息，关注总数和粉丝总数在跳转到具体用户信息页面时再重新获取
+struct FollowUser {
+  1: required i64 id // 用户id
+  2: required string name  // 用户名称
+  3: required bool is_follow  // true-已关注，false-未关注
+  4: required string avatar  // 用户头像Url
 }
 
 struct douyin_relation_follower_list_request {
@@ -248,9 +264,16 @@ struct douyin_relation_follower_list_request {
 struct douyin_relation_follower_list_response {
   1: required i64 status_code // 状态码，0-成功，其他值-失败
   2: optional string status_msg  // 返回状态描述
-  3: list<User> user_list  // 用户列表
+  3: list<FollowerUser> user_list  // 用户列表
 }
 
+// 粉丝用户信息，关注总数和粉丝总数在跳转到具体用户信息页面时再重新获取
+struct FollowerUser {
+  1: required i64 id // 用户id
+  2: required string name  // 用户名称
+  3: required bool is_follow  // true-已关注，false-未关注
+  4: required string avatar  // 用户头像Url
+}
 
 struct douyin_relation_friend_list_request {
   1: required i64 user_id (vt.gt = "0", api.vd="$>0")  // 用户id
@@ -267,12 +290,10 @@ struct douyin_relation_friend_list_response {
 struct FriendUser {
   1: required i64 id // 用户id
   2: required string name  // 用户名称
-  3: optional i64 follow_count  // 关注总数
-  4: optional i64 follower_count   // 粉丝总数
-  5: required bool is_follow  // true-已关注，false-未关注
-  6: required string avatar  // 用户头像Url
-  7: optional string message // 和该好友的最新聊天消息
-  8: required i8 msgType // message消息的类型，0 => 当前请求用户接收的消息， 1 => 当前请求用户发送的消息
+  3: required bool is_follow  // true-已关注，false-未关注
+  4: required string avatar  // 用户头像Url
+  5: optional string message // 和该好友的最新聊天消息
+  6: required i8 msgType // message消息的类型，0 => 当前请求用户接收的消息， 1 => 当前请求用户发送的消息
 }
 
 
@@ -328,41 +349,38 @@ struct UserInfo {
 }
 
 
-// 基础接口
-service FeedService {
+
+
+service VideoService {
+    // Feed
     douyin_feed_response GetFeed(1: douyin_feed_request req) (api.get="/douyin/feed/")
-}
-
-service UserService {
-    douyin_user_register_response Register(1: douyin_user_register_request req) (api.post="/douyin/user/register/")
-    douyin_user_login_response Login(1: douyin_user_login_request req) (api.post="/douyin/user/login/")
-    douyin_user_response GetUserInfo(1: douyin_user_request req) (api.get="/douyin/user/")
-}
-
-service PublishService {
+    // Publish
     douyin_publish_action_response PublishAction(1: douyin_publish_action_request req) (api.post="/douyin/publish/action/")
     douyin_publish_list_response GetPublishVideos(1: douyin_publish_list_request req) (api.get="/douyin/publish/list/")
-}
-
-// 互动接口
-service FavoriteService {
+    // Favorite
     douyin_favorite_action_response FavoriteVideo(1: douyin_favorite_action_request req) (api.post="/douyin/favorite/action/")
     douyin_favorite_list_response GetFavoriteList(1: douyin_favorite_list_request req) (api.get="/douyin/favorite/list/")
 }
 
-service CommentService {
-    douyin_comment_action_response CommentAction(1: douyin_comment_action_request req) (api.post="/douyin/comment/action/")
-    douyin_comment_list_response GetCommentList(1: douyin_comment_list_request req) (api.get="/douyin/comment/list/")
-}
-
-// 社交接口
-service RelationService {
+service UserService {
+    // User
+    douyin_user_register_response Register(1: douyin_user_register_request req) (api.post="/douyin/user/register/")
+    douyin_user_login_response Login(1: douyin_user_login_request req) (api.post="/douyin/user/login/")
+    douyin_user_response GetUserInfo(1: douyin_user_request req) (api.get="/douyin/user/")
+    // Relation
     douyin_relation_action_response Follow(1: douyin_relation_action_request req) (api.post="/douyin/relation/action/")
     douyin_relation_follow_list_response GetFollowList(1: douyin_relation_follow_list_request req) (api.get="/douyin/relation/follow/list/")
     douyin_relation_follower_list_response GetFollowerList(1: douyin_relation_follower_list_request req) (api.get="/douyin/relation/follower/list/")
     douyin_relation_friend_list_response GetFriendList(1: douyin_relation_friend_list_request req) (api.get="/douyin/relation/friend/list/")
 }
 
+// Comment
+service CommentService {
+    douyin_comment_action_response CommentAction(1: douyin_comment_action_request req) (api.post="/douyin/comment/action/")
+    douyin_comment_list_response GetCommentList(1: douyin_comment_list_request req) (api.get="/douyin/comment/list/")
+}
+
+// Message
 service MessageService {
     douyin_message_action_response SendMessage(1: douyin_message_action_request req) (api.post="/douyin/message/action/")
     douyin_message_chat_response GetMessageChat(1: douyin_message_chat_request req) (api.get="/douyin/message/chat/")

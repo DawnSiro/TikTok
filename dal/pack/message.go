@@ -1,36 +1,36 @@
 package pack
 
 import (
-	"douyin/cmd/api/biz/model/api"
-	"douyin/dal/db"
+	"douyin/biz/model/api"
+	"douyin/dal/model"
 	"douyin/pkg/errno"
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 )
 
-func Messages(ms []*db.Message) []*api.Message {
-	if ms == nil {
+func Messages(messages []*model.Message) []*api.Message {
+	if messages == nil {
 		hlog.Error("pack.message.Messages err:", errno.ServiceError)
 		return nil
 	}
 	res := make([]*api.Message, 0)
-	for i := 0; i < len(ms); i++ {
-		res = append(res, Message(ms[i]))
+	for i := 0; i < len(messages); i++ {
+		res = append(res, Message(messages[i]))
 	}
 	return res
 }
 
-func Message(m *db.Message) *api.Message {
-	if m == nil {
+func Message(message *model.Message) *api.Message {
+	if message == nil {
 		hlog.Error("pack.message.Messages err:", errno.ServiceError)
 		return nil
 	}
-	createTime := m.CreateTime.UnixMilli()
+	createTime := message.CreatedTime.UnixMilli()
 	return &api.Message{
-		ID:         int64(m.ID),
-		ToUserID:   int64(m.ToUserID),
-		FromUserID: int64(m.FromUserID),
-		Content:    m.Content,
+		ID:         int64(message.ID),
+		ToUserID:   int64(message.ToUserID),
+		FromUserID: int64(message.FromUserID),
+		Content:    message.Content,
 		CreateTime: &createTime,
 	}
 }

@@ -1,14 +1,14 @@
 package pack
 
 import (
-	"douyin/dal/db"
+	"douyin/dal/model"
 	"douyin/kitex_gen/message"
 	"douyin/pkg/errno"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 )
 
-func Messages(ms []*db.Message) []*message.Message {
+func Messages(ms []*model.Message) []*message.Message {
 	if ms == nil {
 		klog.Error("pack.message.Messages err:", errno.ServiceError)
 		return nil
@@ -20,12 +20,12 @@ func Messages(ms []*db.Message) []*message.Message {
 	return res
 }
 
-func Message(m *db.Message) *message.Message {
+func Message(m *model.Message) *message.Message {
 	if m == nil {
 		klog.Error("pack.message.Messages err:", errno.ServiceError)
 		return nil
 	}
-	createTime := m.CreateTime.UnixMilli()
+	createTime := m.CreatedTime.UnixMilli()
 	return &message.Message{
 		Id:         int64(m.ID),
 		ToUserId:   int64(m.ToUserID),
