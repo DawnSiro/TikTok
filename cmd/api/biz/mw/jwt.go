@@ -42,8 +42,8 @@ func JWT() app.HandlerFunc {
 			c.Abort()
 			return
 		}
-		hlog.Info("mw.jwt.ParseToken userID:", claim.UserID)
-		c.Set(global.Config.JWTConfig.IdentityKey, claim.UserID)
+		hlog.Info("mw.jwt.ParseToken userID:", claim.ID)
+		c.Set(global.Config.JWTConfig.IdentityKey, claim.ID)
 		c.Next(ctx)
 	}
 }
@@ -60,8 +60,8 @@ func ParseToken() app.HandlerFunc {
 			hlog.Info("mw.jwt.ParseToken err:", err.Error())
 			return
 		}
-		hlog.Info("mw.jwt.ParseToken userID:", claim.UserID)
-		c.Set(global.Config.JWTConfig.IdentityKey, claim.UserID)
+		hlog.Info("mw.jwt.ParseToken userID:", claim.ID)
+		c.Set(global.Config.JWTConfig.IdentityKey, claim.ID)
 		return
 	}
 }

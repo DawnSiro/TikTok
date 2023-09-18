@@ -1,7 +1,7 @@
 package pack
 
 import (
-	"douyin/biz/model/api"
+	"douyin/cmd/api/biz/model/api"
 	"douyin/dal/model"
 	"douyin/pkg/errno"
 
